@@ -6,7 +6,7 @@ class Friday extends MainController{
         $this->ModelFriday = $this->model('ModelFriday');
     }
 
-    public function index(){
+    public function index($alert = ""){
 
         // Obtenemos la información de la base de datos
         $results = $this->ModelFriday->get_answers();
@@ -34,7 +34,8 @@ class Friday extends MainController{
 
         $parameters = [
             'menu' => 'Viernes',
-            'answers' => $table_answer
+            'answers' => $table_answer,
+            'alert' => $alert
         ];
 
         $this->view('friday/index', $parameters);
@@ -51,7 +52,7 @@ class Friday extends MainController{
             $keywords = explode(" ", strtoupper($entry['message']));
 
             // Guardamos la respuesta
-            if($this->ModelFriday->add_answer($entry['answer'], $_SESSION['user']->id_user)){
+            if($this->ModelFriday->add_answer($entry['answer'], $_SESSION['user']->id_user, count($keywords))){
 
                 // Obtenemos el id de la respuesta recién ingresada
                 $id_answer = $this->ModelFriday->last_id();
@@ -62,6 +63,8 @@ class Friday extends MainController{
                         die('Algo salio mal');
                     }
                 }
+
+                redirect('/friday/saved');
             }
         }
 
@@ -72,9 +75,31 @@ class Friday extends MainController{
         $this->view('friday/add', $parameters);
     }
 
-    public function update($id){
+    public function update($id, $alert = ''){
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_keyword'])) {
+            $keyword = strtoupper(sanitize($_POST['keyword']));
+
+            if($this->ModelFriday->add_other_keyword($keyword, intval($id), $_SESSION['user']->id_user)){
+                redirect("/friday/update/$id/saved");
+            }else{
+                die("Algo salio mal");
+            }
+        } else if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_answer'])){
+            $answer = sanitize($_POST['answer']);
+
+            if ($this->ModelFriday->update_answer(intval($id), $answer, $_SESSION['user']->id_user)) {
+                redirect("/friday/update/$id/saved_answer");
+            }else{
+                die("Algo salio mal");
+            }
+        }
 
         $entry = $this->ModelFriday->get_entry_info($id);
+
+        if (!$entry) {
+            redirect('/friday');
+        }
 
         $keywords = [];
         foreach ($entry as $key => $keyword) {
@@ -87,10 +112,22 @@ class Friday extends MainController{
         $parameters = [
             "menu" => 'Viernes',
             "keywords" => $keywords,
-            "entry" => $entry
+            "entry" => $entry,
+            "id" => $id,
+            "alert" => $alert
         ];
 
         $this->view('friday/update', $parameters);
+    }
+
+    public function delete_keyword($keyword_id, $id_answer){
+
+        if($this->ModelFriday->del_keyword(intval($keyword_id))){
+            redirect("/friday/update/$id_answer/delete");
+        }else{
+            die("Algo salio mal");
+        }
+
     }
 }
 

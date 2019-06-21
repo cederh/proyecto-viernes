@@ -14,7 +14,7 @@
                 <div class="col-md-12">
                     <div class="form-group">
                         <label for="message">Mensaje</label>
-                        <textarea name="message" id="message" class="form-control" cols="30" rows="10"></textarea>
+                        <textarea name="message" id="message" class="form-control" cols="30" rows="10" required></textarea>
                     </div>
                 </div>
             </div>
@@ -22,7 +22,7 @@
                 <div class="col-md-12">
                     <div class="form-group">
                         <label for="answer">Respuesta</label>
-                        <textarea name="answer" id="answer" class="form-control" cols="30" rows="10"></textarea>
+                        <textarea name="answer" id="answer" class="form-control" cols="30" rows="10" required></textarea>
                     </div>
                 </div>
             </div>

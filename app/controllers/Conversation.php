@@ -74,7 +74,7 @@ class Conversation extends MainController
             $keywords = explode(' ', $message);
     
             // Creamos nuestra consulta
-            $query = "SELECT TOP 1 a.answer, k.id_answer, (COUNT(k.id_answer)) AS N 
+            $query = "SELECT TOP 1 a.answer, a.id_answer, (COUNT(k.id_answer)) AS N, a.n_keywords  
             FROM dbfriday.dbo.tbl_keywords AS k
             INNER JOIN dbfriday.dbo.tbl_answers AS a
             ON k.id_answer = a.id_answer
@@ -97,11 +97,33 @@ class Conversation extends MainController
     
             $db->query($query);
             $answer = $db->register();
+            
+            $con = 0;
+            foreach ($keywords as $key => $word) {
+                
+                $db->query(
+                    "SELECT id_keyword, id_answer, keyword
+                    FROM dbfriday.dbo.tbl_keywords
+                    WHERE id_answer = :id AND keyword = :word
+                ");
+
+                $db->bind(':word', $word);
+                $db->bind(':id', $answer->id_answer);
+
+                if ($db->register()) {
+                    $con++;
+                }
+                
+            }
+
+            // echo $con . ' ' . $answer->n_keywords ;
     
             if ($answer) {
-                # code...
-                // Retornamos la respuesta codificada en utf8
-                echo utf8_encode($answer->answer);
+                if ($con >= $answer->n_keywords / 2) {
+                    echo ($answer->answer);    
+                }else{
+                    echo utf8_encode('Aun no tengo respuesta para eso');
+                }
             } else {
                 echo utf8_encode('Aun no tengo respuesta para eso');
             }

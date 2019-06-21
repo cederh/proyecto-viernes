@@ -21,6 +21,9 @@
     <!-- Mis estilos css -->
     <link href="<?php echo ROUTE_URL?>/css/d_styles.css" rel="stylesheet" />
 
+    <!-- <link rel="stylesheet" href="<?php echo ROUTE_URL?>/css/datatables.css"> -->
+    <link href="<?php echo ROUTE_URL?>/assets/datatable/css/dataTables.bootstrap4.css" rel="stylesheet" />
+    
 </head>
 
 <body class="white-content">

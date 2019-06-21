@@ -3,7 +3,6 @@ class PatientPublic extends MainController
 {
     public function __construct(){
         session_start();
-
         $this->ModelPatient = $this->model("ModelPatient");
     }
 
