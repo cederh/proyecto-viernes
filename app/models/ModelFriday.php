@@ -125,6 +125,36 @@ class ModelFriday
         return $this->db->registers();
 
     }
+
+    public function add_history_message($id_patient, $message, $id_answer){
+
+        $this->db->query("add_history @id_patient = :id_patient, @message = :message , @id_answer = :id_answer");
+
+        $this->db->bind(':id_patient', $id_patient);
+        $this->db->bind(':message', $message);
+        $this->db->bind('id_answer', $id_answer);
+
+        if ($this->db->execute()) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    public function get_history($id){
+
+        $this->db->query(
+            "SELECT h.id_chat_history, h.id_patient, h.message, a.answer , h.update_date
+            FROM dbfriday.dbo.tbl_chat_history AS h
+            INNER JOIN dbfriday.dbo.tbl_answers AS a
+            ON a.id_answer = h.id_answer WHERE h.id_patient = :id"
+        );
+
+        $this->db->bind(':id', $id);
+
+        return $this->db->registers();
+    }
 }
 
 

@@ -8,7 +8,7 @@
     <div class="card-body">
         <!-- Formulario nuevo usuario -->
         <form action="<?php echo ROUTE_URL?>/users/change_password/<?php echo $parameters['user']->id_user ?>" method="post"
-            id="form-change_password">
+            id="">
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-6">

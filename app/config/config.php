@@ -14,7 +14,7 @@
     define('ROUTE_APP', dirname(dirname(__FILE__)));
 
     define('ROUTE_URL', 'http://localhost/proyecto-viernes');
-    // define('ROUTE_URL', 'http://192.168.0.109/proyecto-viernes');
+    // define('ROUTE_URL', 'http://192.168.0.101/proyecto-viernes');
 
     define('SITE_NAME', '_NOMBRE_SITIO');
 

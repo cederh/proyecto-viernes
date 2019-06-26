@@ -25,8 +25,30 @@ class Conversation extends MainController
         header('Content-type: application/json; charset=utf-8');
         
         
-        // Limpiamos y pasamos a mayúsculas la cadena enviada por el usuario
-        $message = strtoupper(filter_var(trim($_POST['message'], 'FILTER_SANITIZE_STRING')));
+        // Limpiamos y pasamos a mayúsculas la cadena enviada por el usuario 
+        // $message = strtoupper(filter_var(trim($_POST['message'], 'FILTER_SANITIZE_STRING')));
+
+        $_POST['message'] =  sanitize($_POST['message']);
+
+        $message = strtoupper((trim($_POST['message'])));
+
+        // echo $message;   
+
+        // Eliminamos los acentos y símbolos de puntuación
+        $message = str_replace('Á', 'A', $message);
+        $message = str_replace('É', 'E', $message);
+        $message = str_replace('Í', 'I', $message);
+        $message = str_replace('Ó', 'O', $message);
+        $message = str_replace('Ú', 'U', $message);
+        
+        $message = str_replace('á', 'A', $message);
+        $message = str_replace('é', 'E', $message);
+        $message = str_replace('í', 'I', $message);
+        $message = str_replace('ó', 'O', $message);
+        $message = str_replace('ú', 'U', $message);
+        
+        // $message = str_replace('T', 't', $message);
+        $message = str_replace('?', '', $message);
         
         // Activar aprendizaje, SOLO PARA ADMINISTRADORES
         if(isset($_SESSION['user']->user_type) && $_SESSION['user']->user_type == 2 && $message == 'ACTIVAR MODO APRENDIZAJE'){
@@ -34,7 +56,7 @@ class Conversation extends MainController
             $_SESSION['friday']['learning'] = 1;
             echo "Modo de aprendizaje activado. Dime algo y luego enseñame como responder"; 
 
-        }else if(isset($_SESSION['friday']['learning']) && $_SESSION['friday']['learning'] == 1){
+        } else if(isset($_SESSION['friday']['learning']) && $_SESSION['friday']['learning'] == 1){
             
             if(!isset($_SESSION['friday']['keywords'])){
                 $_SESSION['friday']['keywords'] = $message;
@@ -52,7 +74,7 @@ class Conversation extends MainController
                 echo "Entiendo que debería responder " .'"'.$_SESSION['friday']['answer'].'"';
             }
         // Confirmar que se decea guardar la información  
-        }else if ( isset($_SESSION['friday']['learning']) && $_SESSION['friday']['learning'] == 2 && $message == 'SI') {
+        } else if ( isset($_SESSION['friday']['learning']) && $_SESSION['friday']['learning'] == 2 && $message == 'SI') {
             
             // Guardamos la información
             if ($this->Modelfriday->add_answer( $_SESSION['friday']['answer'], $_SESSION['user']->id_user) ) {
@@ -69,10 +91,10 @@ class Conversation extends MainController
         } else if (isset($_SESSION['friday']['learning']) && $_SESSION['friday']['learning'] == 2 && $message != 'SI'){
             echo "Acción cancelada";
             $_SESSION['friday']['learning'] == 0;
-        }else{
-            // Dividimos la cadena por palabra y almacenamos en un array
-            $keywords = explode(' ', $message);
-    
+        } else{
+        // Dividimos la cadena por palabra y almacenamos en un array
+        $keywords = explode(' ', $message);
+        
             // Creamos nuestra consulta
             $query = "SELECT TOP 1 a.answer, a.id_answer, (COUNT(k.id_answer)) AS N, a.n_keywords  
             FROM dbfriday.dbo.tbl_keywords AS k
@@ -91,43 +113,122 @@ class Conversation extends MainController
             GROUP BY a.id_answer
             ORDER BY N DESC";
     
-            // echo $query;
+            // echo $query;    
     
             $db = new Sql;
     
             $db->query($query);
             $answer = $db->register();
-            
-            $con = 0;
-            foreach ($keywords as $key => $word) {
-                
-                $db->query(
-                    "SELECT id_keyword, id_answer, keyword
-                    FROM dbfriday.dbo.tbl_keywords
-                    WHERE id_answer = :id AND keyword = :word
-                ");
 
-                $db->bind(':word', $word);
-                $db->bind(':id', $answer->id_answer);
+            // echo $answer->N .' '. $answer->n_keywords;
 
-                if ($db->register()) {
-                    $con++;
-                }
-                
-            }
+            if ($answer AND $answer->N  >= $answer->n_keywords * 0.75) {
 
-            // echo $con . ' ' . $answer->n_keywords ;
-    
-            if ($answer) {
-                if ($con >= $answer->n_keywords / 2) {
                     echo ($answer->answer);    
-                }else{
-                    echo utf8_encode('Aun no tengo respuesta para eso');
-                }
+                    if (isset($_SESSION['patient'])) {
+                        $this->Modelfriday->add_history_message($_SESSION['patient']->id_patient, sanitize($_POST['message']), $answer->id_answer);
+                    }
+
             } else {
-                echo utf8_encode('Aun no tengo respuesta para eso');
+                // Funciones para preguntas
+                if ($this->because_you_think($message)) {    
+                }else if($this->my_something($message)){
+                }else if($this->my_something_2($message)){
+                }else if($this->i_feel($message)){
+                }else if($this->i_have($message)){
+                }else {
+                    echo 'Hablame mas de tus problemas';
+                }
+
             }
 
+        }
+    }
+
+    public function history(){
+        // Obtenemos el historial del paciente.
+        $history = $this->Modelfriday->get_history($_SESSION['patient']->id_patient);
+
+        $chat_message_list = '';
+        foreach ($history as $key => $message) {
+
+            $dt = date_format(new DateTime($message->update_date), 'd-m H:i:s');
+
+            $chat_message_list .= '
+            <div class="message-row you-message">
+            <div class="message-content">
+                <div class="message-text"> '.$message->message.' </div>
+                <div class="message-time">'.$dt.'</div>
+            </div>
+            </div>
+            <div class="message-row other-message">
+                <div class="message-content"><img src="img/viernes.png">
+                    <div class="message-text">'. $message->answer.'</div>
+                    <div class="message-time">'.$dt.'</div>
+                </div>
+            </div>
+            ';
+            
+        }
+
+        echo $chat_message_list;
+        
+    }
+
+    public function because_you_think($message){
+        // echo strpos($message, 'SOY' );
+        if( strpos($message, 'SOY ' ) === false ){
+            return false;
+        }else{
+            $answer = explode('SOY ', $message);
+
+            echo '¿Porque crees que eres '. strtolower($answer[1]).'?';
+            return true;
+        }
+
+    }
+
+    public function my_something($message){
+        if( strpos($message, 'MI ' ) === false ){
+            return false;
+        }else{
+            $answer = explode('MI ', $message);
+
+            echo '¿Que pasa con tu '. strtolower($answer[1]).'?';
+            return true;
+        }
+    }
+
+    public function my_something_2($message){
+        if( strpos($message, 'MIS ' ) === false ){
+            return false;
+        }else{
+            $answer = explode('MIS ', $message);
+
+            echo '¿Que pasa con tus '. strtolower($answer[1]).'?';
+            return true;
+        }
+    }
+
+    public function i_feel($message){
+        if( strpos($message, 'ME SIENTO ' ) === false ){
+            return false;
+        }else{
+            $answer = explode('ME SIENTO ', $message);
+
+            echo '¿Que te hace sentir '. strtolower($answer[1]).'?';
+            return true;
+        }
+    }
+
+    public function i_have($message){
+        if( strpos($message, 'TENGO ' ) === false ){
+            return false;
+        }else{
+            $answer = explode('TENGO ', $message);
+
+            echo '¿Desde cuando tienes '. strtolower($answer[1]).'?';
+            return true;
         }
     }
     

@@ -78,7 +78,7 @@
         // Realizamos nuestra pericion AJAX
         var petition = new XMLHttpRequest();
 
-        // petition.open('POST', 'http://192.168.0.109/proyecto-viernes/Conversation');
+        // petition.open('POST', 'http://192.168.0.101/proyecto-viernes/Conversation');
         petition.open('POST', 'http://localhost/proyecto-viernes/Conversation');
         // Establecemos el header de como queremos envier nuestra peticion
         petition.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -129,6 +129,26 @@
         petition.send(message_send);
 
 
+    }
+
+    function load_history(){
+        // Realizamos nuestra pericion AJAX
+        var petition = new XMLHttpRequest();
+
+        // petition.open('POST', 'http://192.168.0.101/proyecto-viernes/Conversation/history');
+        petition.open('POST', 'http://localhost/proyecto-viernes/Conversation/history');
+
+        petition.send();
+
+        petition.onload = function(){
+            var history = (petition.responseText);
+            var chat_list = document.getElementById('chat-message-list');
+
+            chat_list.innerHTML = history;
+
+
+
+        }
     }
 
     

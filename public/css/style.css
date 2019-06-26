@@ -362,6 +362,10 @@ body {
   color: #777;
 }
 
+.other-message .message-time{
+  margin-top: -15px;
+}
+
 .you-message .message-text {
   background: #0048AA;
   color: #EEEEEE;

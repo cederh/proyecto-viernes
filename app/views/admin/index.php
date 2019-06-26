@@ -6,7 +6,7 @@
                 <h3 class="card-title">Numero de pacientes </h3>
             </div>
             <div class="card-body text-center">
-                <h2><i class="fas fa-file-medical text-info"></i> 4</h2>
+                <h2><i class="fas fa-file-medical text-info"></i> <?php echo $parameters['patients'] ?></h2>
             </div>
         </div>
     </div>
@@ -16,7 +16,7 @@
                 <h3 class="card-title">Numero de respuestas</h3>
             </div>
             <div class="card-body text-center">
-                <h2><i class="fas fa-comment text-info"></i> 4</h2>
+                <h2><i class="fas fa-comment text-info"></i> <?php echo $parameters['answers'] ?></h2>
             </div>
         </div>
     </div>

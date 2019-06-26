@@ -40,8 +40,13 @@ class Binnacle extends MainController
         }else if($register->operation == 'INSERT'){
             $type = 'INSERT';
             $old_data = '';
-        }
+        } else if($register->operation == 'DELETE'){
+            $type = 'DELETE';
+            $new_data = '';
+            $old_data = explode("|", $register->old_data);
 
+        }
+// print_r($old_data);
         $parameters = [
             'menu' => 'Biacora',
             'register' => $register,

@@ -46,6 +46,28 @@
 
         <?php endif;?>
 
+        <?php if ($parameters['type'] == 'DELETE'):?>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Columna</th>
+                    <th>Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($parameters['old_data'] as $key => $data):?>
+                <?php $temp_data = explode("=", $data)?>
+                <tr>
+                    <td><?php echo $temp_data[0]?></td>
+                    <td><?php echo $temp_data[1]?></td>
+                </tr>
+                <?php endforeach;?>
+            </tbody>
+        </table>
+
+        <?php endif;?>
+
         <?php if ($parameters['type'] == 'UPDATE'):?>
         <table class="table">
             <thead>
